@@ -1,30 +1,37 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const session = require('express-session')
-const customer_routes = require('./router/auth_users.js').authenticated;
-const genl_routes = require('./router/general.js').general;
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const session = require("express-session");
+const customer_routes = require("./router/auth_users.js").authenticated;
+const genl_routes = require("./router/general.js").general;
 
 const app = express();
 
 app.use(express.json());
 
-app.use("/customer", session({ secret: "fingerprint_customer", resave: true, saveUninitialized: true }))
+app.use(
+  "/customer",
+  session({
+    secret: "fingerprint_customer",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 //middleware to verify JWT token
 app.use("/customer/auth/*", function auth(req, res, next) {
-    const token = req.session.authorization?.['accessToken']
-    if (token) {
-        jwt.verify(token, 'keyforauth', (err, user) => {
-            if (err) {
-                return res.status(403).json({ message: "User not authenticated" });
-            }
+  const token = req.headers.authorization.replace("Bearer ", "");
+  if (token) {
+    jwt.verify(token, "access", (err, user) => {
+      if (err) {
+        return res.status(403).json({ message: "User not authenticated" });
+      }
 
-            req.user = user
-            next()
-        })
-    } else {
-        return res.status(403).json({ message: "User not logged in" });
-    }
+      req.user = user;
+      next();
+    });
+  } else {
+    return res.status(403).json({ message: "User not logged in" });
+  }
 });
 
 const PORT = 5000;
