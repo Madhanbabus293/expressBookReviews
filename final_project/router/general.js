@@ -24,7 +24,6 @@ const getBooks = (details) => {
     return books[isbn];
   }
 
-  console.log(details)
   return Object.fromEntries(
     Object.entries(books).filter(
       ([id, book]) => book.author === author || book.title === title
